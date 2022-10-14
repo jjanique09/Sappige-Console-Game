@@ -1,6 +1,6 @@
 ﻿namespace Level_Data
 {
-    class ConcreteStrategyB : IStrategy
+    class XmlReader : IStrategy
     {
         public object DoAlgorithm(object data)
         {

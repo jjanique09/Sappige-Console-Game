@@ -17,7 +17,7 @@
                 Console.WriteLine();
 
                 Console.WriteLine("Client: Strategy is set to reverse sorting.");
-                context.SetStrategy(new ConcreteStrategyB());
+                context.SetStrategy(new XmlReader());
                 context.DoSomeBusinessLogic();
             
        
