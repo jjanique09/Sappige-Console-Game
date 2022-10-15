@@ -9,11 +9,38 @@ namespace Level_Data
 
         public object DoAlgorithm(object data)
         {
-            Console.WriteLine("Test " + CreatePlayer().startX);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\nPrinted Player\n" + " Lives = " + CreatePlayer().lives + "\n StartX = " + CreatePlayer().startX + "\n StartY = " + CreatePlayer().startY + "\n StartRoomId = " + CreatePlayer().startRoomId);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("\nPrinting All Rooms");
+            foreach (var room in CreateRoom())
+            {
+                Console.WriteLine(" RoomID = " + room.id + "\n Height = " + room.height + "\n Width = " + room.width + "\n Type = " + room.type + "\n");
+                foreach (var roomItem in room.items)
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine("  Item Type = " + roomItem.type + "\n" + "  Color = " + roomItem.color + "\n" + "  X = " + roomItem.x + "\n" + "  Y = " + roomItem.y + "\n" + "  Damage = " + roomItem.damage+"\n");
+                }
+            Console.ForegroundColor = ConsoleColor.Blue;
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            
+            
+            
+            
+            
             var list = data as List<string>;
             list.Sort();
             return list;
         }
+
+
+        
+
+
+
+
 
         public Player CreatePlayer()
         {
@@ -26,6 +53,7 @@ namespace Level_Data
                 lives = player["lives"].Value<int>(),
             };   
         }
+
 
         public List<Room> CreateRoom()
         {
@@ -46,33 +74,96 @@ namespace Level_Data
             return roomList;
         }
 
+
         private List<Item> CreateRoomItems(JToken items)
         {
             List<Item> itemList = new List<Item>();
             foreach (var jsonItem in items)
             {
                 itemList.Add(new Item
-                 {
-                    type = jsonItem["type"].Value<string>(),
-                    color = (jsonItem["color"] ?? "").Value<string>(),
-                    damage = (jsonItem["int"] ?? "").Value<int>(),
-                    x = jsonItem["x"].Value<int>(),
-                    y = jsonItem["y"].Value<int>(),
-            });
+                {
+                type = jsonItem["type"].Value<string>(),
+                color = (jsonItem["color"] ?? "").Value<string>(),
+                x = jsonItem["x"].Value<int>(),
+                y = jsonItem["y"].Value<int>(),
+                damage = (jsonItem["damage"] ?? 0).Value<int>()
+                });
             }
             return itemList;
+        }
+
+
+        public List<Connection> CreateConnection(JObject json)
+        {
+            var connections = new List<Connection>();
+            foreach (var connection in json["connections"])
+            {
+                Connection setConnection = new Connection();
+                if (connection["NORTH"] != null) { setConnection.north = connection["NORTH"].Value<int?>(); }
+                if (connection["EAST"] != null) { setConnection.east = connection["EAST"].Value<int?>(); }
+                if (connection["WEST"] != null) { setConnection.west = connection["WEST"].Value<int?>(); }
+                if (connection["SOUTH"] != null) { setConnection.south = connection["SOUTH"].Value<int?>(); }
+                
+                List<Door> doors = new List<Door>();
+                if (connection["doors"] != null) { setConnection.doors = CreateDoors(JToken.FromObject(connection["doors"])); }
+                connections.Add(setConnection);
+            }
+            return connections;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public class Door
+        {
+            public string? type { get; set; }
+            public string? color { get; set; }
+            public int? no_of_stones { get; set; }
+        
+        }
+    
+
+            public class Connection
+        {
+            public int? north { get; set; }
+            public int? east { get; set; }
+            public int? south { get; set; }
+            public int? west { get; set; }
+            public List<Door>? doors { get; set; }
         }
 
 
         public class Item 
         {
            public string type { get; set; }
-           public string color { get; set; }
+           public string? color { get; set; }
            public int x { get; set; }
            public int y { get; set; }
-           public int damage { get; set; }
+           public int? damage { get; set; }
         }
-
 
 
         public class Room
@@ -85,10 +176,7 @@ namespace Level_Data
         }
 
 
-
-
-
-public class Player
+        public class Player
         {
             public int startRoomId { get; set; }
             public int startX { get; set; }
