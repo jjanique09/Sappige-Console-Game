@@ -11,17 +11,53 @@ namespace Level_Data
         public object DoAlgorithm(object data)
         {
 
-            var regularOrder = new RegularDoor();
-            Console.WriteLine(regularOrder.doorOpens());
-            Console.WriteLine();
-            var preOrder = new ToggleDoor();
-            Console.WriteLine(preOrder.doorOpens());
-            Console.WriteLine();
-            var premiumPreorder = new PremiumPreorder(preOrder);
-            Console.WriteLine(premiumPreorder.doorOpens());
+
+
+            PlainDoor plainPizzaObj = new PlainDoor();
+            string plainPizza = plainPizzaObj.MakeDoor();
+            Console.WriteLine(plainPizza);
+            
+            
+            DoorDecorator chickenPizzaDecorator = new ChickenPizzaDecorator(plainPizzaObj);
+            string chickenPizza = chickenPizzaDecorator.MakeDoor();
+            Console.WriteLine("\n'" + chickenPizza + "' using ChickenPizzaDecorator");
+
+
+            Door vegPizzaDecorator = new VegPizzaDecorator(chickenPizzaDecorator);
+
+            Console.WriteLine("TEST "+ vegPizzaDecorator.MakeDoor());
+        
+
+
+            string vegPizza = vegPizzaDecorator.MakeDoor();
+            
+            
+            
+            Console.WriteLine("\n'" + vegPizza + "' using VegPizzaDecorator");
+            Console.Read();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             /*
-             //code-maze.com/decorator-design-pattern
 
             Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("\nPrinted Player\n" + " Lives = " + CreatePlayer().lives + "\n StartX = " + CreatePlayer().startX + "\n StartY = " + CreatePlayer().startY + "\n StartRoomId = " + CreatePlayer().startRoomId);
@@ -45,6 +81,122 @@ namespace Level_Data
             list.Sort();
             return list;
         }
+
+/*
+        private Door CreateDoors(JToken items)
+        {
+            Door itemList = new Door();
+            foreach (var jsonItem in items)
+            {
+                var type = jsonItem["type"].Value<string>();
+                Door a = new Door();
+            }
+            return itemList;
+        }*/
+
+     
+       //Stap 1 Door Interface
+       
+        public interface Door
+        {
+            string MakeDoor();
+        }
+
+
+        
+        // Stap 2 Concrete Door Class
+
+        public class PlainDoor : Door
+        {
+            public string MakeDoor()
+            {
+                return "Plain Pizza";
+            }
+        }
+
+        // Stap 3 Creating Pizza Decorator
+
+        public abstract class DoorDecorator : Door
+        {
+            protected Door door;
+            public DoorDecorator(Door door)
+            {
+                this.door = door;
+            }
+            public virtual string MakeDoor()
+            {
+                return door.MakeDoor();
+            }
+        }
+
+
+
+        // Stap 4 Creating Chicken Pizza Decorator
+
+        public class ChickenPizzaDecorator : DoorDecorator
+        {
+            public ChickenPizzaDecorator(Door door) : base(door)
+            {
+            }
+            public override string MakeDoor()
+            {
+                return door.MakeDoor() + AddChicken(); // adding to base pizza CHANGE ME
+            }
+            private string AddChicken()
+            {
+                return ", Chicken added";
+            }
+        }
+
+        // Stap 5 Creating Veg Pizza Decorator
+
+        public class VegPizzaDecorator : DoorDecorator
+        {
+            public VegPizzaDecorator(Door door) : base(door)
+            {
+            }
+            public override string MakeDoor()
+            {
+                return door.MakeDoor() + AddVegetables();
+            }
+            private string AddVegetables()
+            {
+                return ", Vegetables added";
+            }
+        }
+
+   
+
+
+        // Je wil hebt een methode die bepaald of een deur open mag voor elk verschillend deur type - Fixed
+        // Deze methode geeft een booelean terug maar hoe decorate je dan 2 verschillende deuren?
+        // Er moeten parameters worden doorgevoerd om bepaalde variabelen te setten zoals: color, no_of_stones. het variabele "Type" word bepaald door de decorator
+        // 
+
+
+
+
+
+
+
+
+/*
+        public class Door
+        {
+            public string? type { get; set; }
+            public string? color { get; set; }
+            public int? no_of_stones { get; set; }
+
+        }
+
+*/
+
+
+
+
+
+
+
 
 
         public Player CreatePlayer()
@@ -108,29 +260,12 @@ namespace Level_Data
                 if (connection["SOUTH"] != null) { setConnection.south = connection["SOUTH"].Value<int?>(); }
                 
                 List<Door> doors = new List<Door>();
-                if (connection["doors"] != null) { setConnection.doors = CreateDoors(JToken.FromObject(connection["doors"])); }
+              //  if (connection["doors"] != null) { setConnection.doors = CreateDoors(JToken.FromObject(connection["doors"])); }
                 connections.Add(setConnection);
             }
             return connections;
         }
 
-        private List<Door> CreateDoors(JToken items)
-        {
-            List<Door> itemList = new List<Door>();
-            foreach (var jsonItem in items)
-            {
-                var type = jsonItem["type"].Value<string>();
-                
-                
-                
-                
-                
-                Door a = new Door();
-
-                itemList.Add(a);
-            }
-            return itemList;
-        }
 
  
     
@@ -175,11 +310,3 @@ namespace Level_Data
 	}
 }
 
-
-public class Door
-{
-    public string? type { get; set; }
-    public string? color { get; set; }
-    public int? no_of_stones { get; set; }
-
-}
