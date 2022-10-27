@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static Level_Data.JsonReader;
 
 namespace Level_Data
 {
@@ -10,36 +11,40 @@ namespace Level_Data
         public object DoAlgorithm(object data)
         {
 
+            var regularOrder = new RegularDoor();
+            Console.WriteLine(regularOrder.doorOpens());
+            Console.WriteLine();
+            var preOrder = new ToggleDoor();
+            Console.WriteLine(preOrder.doorOpens());
+            Console.WriteLine();
+            var premiumPreorder = new PremiumPreorder(preOrder);
+            Console.WriteLine(premiumPreorder.doorOpens());
+
+            /*
+             //code-maze.com/decorator-design-pattern
+
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\nPrinted Player\n" + " Lives = " + CreatePlayer().lives + "\n StartX = " + CreatePlayer().startX + "\n StartY = " + CreatePlayer().startY + "\n StartRoomId = " + CreatePlayer().startRoomId);
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("\nPrinting All Rooms");
-            foreach (var room in CreateRoom())
-            {
-                Console.WriteLine(" RoomID = " + room.id + "\n Height = " + room.height + "\n Width = " + room.width + "\n Type = " + room.type + "\n");
-                foreach (var roomItem in room.items)
-                {
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    Console.WriteLine("  Item Type = " + roomItem.type + "\n" + "  Color = " + roomItem.color + "\n" + "  X = " + roomItem.x + "\n" + "  Y = " + roomItem.y + "\n" + "  Damage = " + roomItem.damage+"\n");
-                }
-            Console.ForegroundColor = ConsoleColor.Blue;
-            }
-            Console.ForegroundColor = ConsoleColor.White;
-            
-            
-            
-            
-            
+                        Console.WriteLine("\nPrinted Player\n" + " Lives = " + CreatePlayer().lives + "\n StartX = " + CreatePlayer().startX + "\n StartY = " + CreatePlayer().startY + "\n StartRoomId = " + CreatePlayer().startRoomId);
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine("\nPrinting All Rooms");
+                        foreach (var room in CreateRoom())
+                        {
+                            Console.WriteLine(" RoomID = " + room.id + "\n Height = " + room.height + "\n Width = " + room.width + "\n Type = " + room.type + "\n");
+                            foreach (var roomItem in room.items)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Magenta;
+                                Console.WriteLine("  Item Type = " + roomItem.type + "\n" + "  Color = " + roomItem.color + "\n" + "  X = " + roomItem.x + "\n" + "  Y = " + roomItem.y + "\n" + "  Damage = " + roomItem.damage + "\n");
+                            }
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                        }
+                        Console.ForegroundColor = ConsoleColor.White;
+            */
+
+
             var list = data as List<string>;
             list.Sort();
             return list;
         }
-
-
-        
-
-
-
 
 
         public Player CreatePlayer()
@@ -53,8 +58,6 @@ namespace Level_Data
                 lives = player["lives"].Value<int>(),
             };   
         }
-
-
         public List<Room> CreateRoom()
         {
             List<Room> roomList = new List<Room>();
@@ -111,39 +114,25 @@ namespace Level_Data
             return connections;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public class Door
+        private List<Door> CreateDoors(JToken items)
         {
-            public string? type { get; set; }
-            public string? color { get; set; }
-            public int? no_of_stones { get; set; }
-        
+            List<Door> itemList = new List<Door>();
+            foreach (var jsonItem in items)
+            {
+                var type = jsonItem["type"].Value<string>();
+                
+                
+                
+                
+                
+                Door a = new Door();
+
+                itemList.Add(a);
+            }
+            return itemList;
         }
+
+ 
     
 
             public class Connection
@@ -184,4 +173,13 @@ namespace Level_Data
             public int lives { get; set; }
         }
 	}
+}
+
+
+public class Door
+{
+    public string? type { get; set; }
+    public string? color { get; set; }
+    public int? no_of_stones { get; set; }
+
 }
