@@ -11,27 +11,18 @@ namespace Level_Data
         public object DoAlgorithm(object data)
         {
 
+            Backpack backpack = new Backpack();
+            backpack.no_of_stones = 2;
 
-
-            PlainDoor plainPizzaObj = new PlainDoor();
-            string plainPizza = plainPizzaObj.MakeDoor();
-            Console.WriteLine(plainPizza);
-            
-            
+            PlainDoor plainPizzaObj = new PlainDoor(2);
             DoorDecorator chickenPizzaDecorator = new ChickenPizzaDecorator(plainPizzaObj);
-            string chickenPizza = chickenPizzaDecorator.MakeDoor();
-            Console.WriteLine("\n'" + chickenPizza + "' using ChickenPizzaDecorator");
-
-
             Door vegPizzaDecorator = new VegPizzaDecorator(chickenPizzaDecorator);
+
+          
 
             Console.WriteLine("TEST "+ vegPizzaDecorator.MakeDoor());
         
-
-
             string vegPizza = vegPizzaDecorator.MakeDoor();
-            
-            
             
             Console.WriteLine("\n'" + vegPizza + "' using VegPizzaDecorator");
             Console.Read();
@@ -97,17 +88,32 @@ namespace Level_Data
      
        //Stap 1 Door Interface
        
+
+
+
+
+
+
+
+
         public interface Door
         {
             string MakeDoor();
         }
-
-
         
         // Stap 2 Concrete Door Class
 
         public class PlainDoor : Door
         {
+
+            public int no_of_stones { get; set; }
+
+
+            public PlainDoor(int v)
+            {
+                no_of_stones = v;
+            }
+
             public string MakeDoor()
             {
                 return "Plain Pizza";
@@ -165,7 +171,7 @@ namespace Level_Data
             }
         }
 
-   
+
 
 
         // Je wil hebt een methode die bepaald of een deur open mag voor elk verschillend deur type - Fixed
@@ -180,16 +186,21 @@ namespace Level_Data
 
 
 
-/*
-        public class Door
+        /*
+                public class Door
+                {
+                    public string? type { get; set; }
+                    public string? color { get; set; }
+                    public int? no_of_stones { get; set; }
+
+                }
+
+
+        */
+        public class Backpack
         {
-            public string? type { get; set; }
-            public string? color { get; set; }
-            public int? no_of_stones { get; set; }
-
+            public int no_of_stones { get; set; }
         }
-
-*/
 
 
 
