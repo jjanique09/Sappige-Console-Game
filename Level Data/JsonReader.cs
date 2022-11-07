@@ -14,17 +14,13 @@ namespace Level_Data
             Backpack backpack = new Backpack();
             backpack.no_of_stones = 2;
 
-            PlainDoor plainPizzaObj = new PlainDoor(2);
+            PlainDoor plainPizzaObj = new PlainDoor();
             DoorDecorator chickenPizzaDecorator = new ChickenPizzaDecorator(plainPizzaObj);
             Door vegPizzaDecorator = new VegPizzaDecorator(chickenPizzaDecorator);
+            Console.WriteLine("1 "+ chickenPizzaDecorator.Open());
+            Console.WriteLine("1 "+ vegPizzaDecorator.Open());
 
-          
 
-            Console.WriteLine("TEST "+ vegPizzaDecorator.MakeDoor());
-        
-            string vegPizza = vegPizzaDecorator.MakeDoor();
-            
-            Console.WriteLine("\n'" + vegPizza + "' using VegPizzaDecorator");
             Console.Read();
 
 
@@ -73,50 +69,49 @@ namespace Level_Data
             return list;
         }
 
-/*
-        private Door CreateDoors(JToken items)
+        /*
+                private Door CreateDoors(JToken items)
+                {
+                    Door itemList = new Door();
+                    foreach (var jsonItem in items)
+                    {
+                        var type = jsonItem["type"].Value<string>();
+                        Door a = new Door();
+                    }
+                    return itemList;
+                }*/
+
+
+        //Stap 1 Door Interface
+
+
+
+
+
+
+
+
+
+        public class Handle
         {
-            Door itemList = new Door();
-            foreach (var jsonItem in items)
-            {
-                var type = jsonItem["type"].Value<string>();
-                Door a = new Door();
-            }
-            return itemList;
-        }*/
-
-     
-       //Stap 1 Door Interface
-       
+            public bool Toggle { get; set; } = true;
 
 
-
-
-
-
+        }
 
 
         public interface Door
         {
-            string MakeDoor();
+            bool Open();
         }
-        
+
         // Stap 2 Concrete Door Class
 
         public class PlainDoor : Door
         {
-
-            public int no_of_stones { get; set; }
-
-
-            public PlainDoor(int v)
+            public bool Open()
             {
-                no_of_stones = v;
-            }
-
-            public string MakeDoor()
-            {
-                return "Plain Pizza";
+               return true;
             }
         }
 
@@ -125,14 +120,19 @@ namespace Level_Data
         public abstract class DoorDecorator : Door
         {
             protected Door door;
+
+
             public DoorDecorator(Door door)
             {
                 this.door = door;
             }
-            public virtual string MakeDoor()
+
+
+            public virtual bool Open()
             {
-                return door.MakeDoor();
+                return door.Open();
             }
+
         }
 
 
@@ -141,16 +141,21 @@ namespace Level_Data
 
         public class ChickenPizzaDecorator : DoorDecorator
         {
+            Player player = null;
             public ChickenPizzaDecorator(Door door) : base(door)
             {
             }
-            public override string MakeDoor()
+            public override bool Open()
             {
-                return door.MakeDoor() + AddChicken(); // adding to base pizza CHANGE ME
-            }
-            private string AddChicken()
-            {
-                return ", Chicken added";
+                if (door.Open() == true)
+                {
+                    if (player == null)
+                    {
+                        return true;
+                    }
+                    else { return false; }
+                }
+                else { return false; }
             }
         }
 
@@ -158,26 +163,31 @@ namespace Level_Data
 
         public class VegPizzaDecorator : DoorDecorator
         {
+            Player player = new Player();
             public VegPizzaDecorator(Door door) : base(door)
             {
             }
-            public override string MakeDoor()
+            public override bool Open()
             {
-                return door.MakeDoor() + AddVegetables();
-            }
-            private string AddVegetables()
-            {
-                return ", Vegetables added";
+                if (door.Open() == true)
+                {
+                    if (player == null)
+                    {
+                        return true;
+                    }
+                    else { return false; }
+                }
+                else { return false; }
             }
         }
 
 
 
 
-        // Je wil hebt een methode die bepaald of een deur open mag voor elk verschillend deur type - Fixed
-        // Deze methode geeft een booelean terug maar hoe decorate je dan 2 verschillende deuren?
-        // Er moeten parameters worden doorgevoerd om bepaalde variabelen te setten zoals: color, no_of_stones. het variabele "Type" word bepaald door de decorator
-        // 
+            // Je wil hebt een methode die bepaald of een deur open mag voor elk verschillend deur type - Fixed
+            // Deze methode geeft een booelean terug maar hoe decorate je dan 2 verschillende deuren?
+            // Er moeten parameters worden doorgevoerd om bepaalde variabelen te setten zoals: color, no_of_stones. het variabele "Type" word bepaald door de decorator
+            // 
 
 
 
@@ -186,18 +196,18 @@ namespace Level_Data
 
 
 
-        /*
-                public class Door
-                {
-                    public string? type { get; set; }
-                    public string? color { get; set; }
-                    public int? no_of_stones { get; set; }
+            /*
+                    public class Door
+                    {
+                        public string? type { get; set; }
+                        public string? color { get; set; }
+                        public int? no_of_stones { get; set; }
 
-                }
+                    }
 
 
-        */
-        public class Backpack
+            */
+            public class Backpack
         {
             public int no_of_stones { get; set; }
         }
