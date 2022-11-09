@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 using static Level_Data.JsonReader;
 
 namespace Level_Data
@@ -11,38 +12,14 @@ namespace Level_Data
         public object DoAlgorithm(object data)
         {
 
-            Backpack backpack = new Backpack();
-            backpack.no_of_stones = 2;
-
             PlainDoor plainPizzaObj = new PlainDoor();
-            DoorDecorator chickenPizzaDecorator = new ChickenPizzaDecorator(plainPizzaObj);
+            DoorDecorator chickenPizzaDecorator = new ColoredDoorDecorator(plainPizzaObj);
             Door vegPizzaDecorator = new VegPizzaDecorator(chickenPizzaDecorator);
+
             Console.WriteLine("1 "+ chickenPizzaDecorator.Open());
             Console.WriteLine("1 "+ vegPizzaDecorator.Open());
 
-
             Console.Read();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             /*
 
@@ -69,87 +46,46 @@ namespace Level_Data
             return list;
         }
 
-        /*
-                private Door CreateDoors(JToken items)
-                {
-                    Door itemList = new Door();
-                    foreach (var jsonItem in items)
-                    {
-                        var type = jsonItem["type"].Value<string>();
-                        Door a = new Door();
-                    }
-                    return itemList;
-                }*/
-
-
-        //Stap 1 Door Interface
-
-
-
-
-
-
-
-
-
-        public class Handle
-        {
-            public bool Toggle { get; set; } = true;
-
-
-        }
-
-
         public interface Door
         {
-            bool Open();
+            bool Open(Game game);
         }
 
-        // Stap 2 Concrete Door Class
-
+        
         public class PlainDoor : Door
         {
-            public bool Open()
+            public bool Open(Game game)
             {
                return true;
             }
         }
 
-        // Stap 3 Creating Pizza Decorator
 
         public abstract class DoorDecorator : Door
         {
             protected Door door;
-
 
             public DoorDecorator(Door door)
             {
                 this.door = door;
             }
 
-
-            public virtual bool Open()
+            public virtual bool Open(Game game)
             {
-                return door.Open();
+                return door.Open(game);
             }
-
         }
 
-
-
-        // Stap 4 Creating Chicken Pizza Decorator
-
-        public class ChickenPizzaDecorator : DoorDecorator
+        public class ColoredDoorDecorator : DoorDecorator
         {
-            Player player = null;
-            public ChickenPizzaDecorator(Door door) : base(door)
+            public ColoredDoorDecorator(Door door) : base(door)
             {
             }
-            public override bool Open()
+            public override bool Open(Game game)
             {
-                if (door.Open() == true)
+                if (door.Open(game) == true)
                 {
-                    if (player == null)
+                    if (game.player.items.FindAll(x=>x.type.Equals("key") && x.color.Equals("red")).Count() > 0 ) 
                     {
                         return true;
                     }
@@ -163,13 +99,12 @@ namespace Level_Data
 
         public class VegPizzaDecorator : DoorDecorator
         {
-            Player player = new Player();
             public VegPizzaDecorator(Door door) : base(door)
             {
             }
-            public override bool Open()
+            public override bool Open(Game game)
             {
-                if (door.Open() == true)
+                if (door.Open(game) == true)
                 {
                     if (player == null)
                     {
@@ -184,10 +119,13 @@ namespace Level_Data
 
 
 
-            // Je wil hebt een methode die bepaald of een deur open mag voor elk verschillend deur type - Fixed
-            // Deze methode geeft een booelean terug maar hoe decorate je dan 2 verschillende deuren?
-            // Er moeten parameters worden doorgevoerd om bepaalde variabelen te setten zoals: color, no_of_stones. het variabele "Type" word bepaald door de decorator
-            // 
+
+
+
+        // Je wil hebt een methode die bepaald of een deur open mag voor elk verschillend deur type - Fixed
+        // Deze methode geeft een booelean terug maar hoe decorate je dan 2 verschillende deuren?
+        // Er moeten parameters worden doorgevoerd om bepaalde variabelen te setten zoals: color, no_of_stones. het variabele "Type" word bepaald door de decorator
+        // 
 
 
 
@@ -196,29 +134,17 @@ namespace Level_Data
 
 
 
-            /*
-                    public class Door
-                    {
-                        public string? type { get; set; }
-                        public string? color { get; set; }
-                        public int? no_of_stones { get; set; }
+        /*
+                public class Door
+                {
+                    public string? type { get; set; }
+                    public string? color { get; set; }
+                    public int? no_of_stones { get; set; }
 
-                    }
-
-
-            */
-            public class Backpack
-        {
-            public int no_of_stones { get; set; }
-        }
+                }
 
 
-
-
-
-
-
-
+        */
 
         public Player CreatePlayer()
         {
@@ -237,21 +163,21 @@ namespace Level_Data
             foreach (var room in GameJsonObj["rooms"])
             {
                 List<Item> setItems = new List<Item>();
-                if (room["items"] != null) { setItems = CreateRoomItems(JToken.FromObject(room["items"])); }
+                if (room["items"] != null) { setItems = CreateRoomItems(JToken.FromObject(room["items"])); } 
                 roomList.Add(new Room
                 {
                     id = room["id"].Value<int>(),
                     width = room["width"].Value<int>(),
                     height = room["height"].Value<int>(),
                     type = room["type"].Value<string>(),
-                    items = setItems
+                    items = setItems 
                 });
             }
             return roomList;
         }
 
 
-        private List<Item> CreateRoomItems(JToken items)
+        private List<Item> CreateRoomItems(JToken items) /// Convert to Factory -> That also adds pickup/step-on logic.
         {
             List<Item> itemList = new List<Item>();
             foreach (var jsonItem in items)
@@ -281,17 +207,55 @@ namespace Level_Data
                 if (connection["SOUTH"] != null) { setConnection.south = connection["SOUTH"].Value<int?>(); }
                 
                 List<Door> doors = new List<Door>();
-              //  if (connection["doors"] != null) { setConnection.doors = CreateDoors(JToken.FromObject(connection["doors"])); }
+                if (connection["doors"] != null) { setConnection.doors = CreateDoors(JToken.FromObject(connection["doors"])); }
                 connections.Add(setConnection);
             }
             return connections;
         }
 
 
- 
-    
+        private Door CreateDoors(JToken items)
+        {
+            Door itemList = new Door();
+            foreach (var jsonItem in items)
+            {
+                var type = jsonItem["type"].Value<string>();
+                Door a = new Door();
+            }
+            return itemList;
+        }
 
-            public class Connection
+
+
+
+
+
+
+        /// <summary>
+        /// 
+        /// These Classes are currently internal but have to become a external.
+        /// The classes are in this class while the development of the decorators is 
+        /// because this allows me to develop faster without having to jump around classes
+        /// 
+        /// </summary>
+
+        public class Game
+        {
+            public Game(Player setPlayer, List<Connection> setConnections, List<Room> setRooms)
+            {
+                player = setPlayer;
+                connections = setConnections;
+                rooms = setRooms;
+            }
+            
+            public Player player { get; set; }
+            public List<Connection> connections { get; set; }
+            public List<Room> rooms { get; set; } 
+            
+        }
+
+
+        public class Connection
         {
             public int? north { get; set; }
             public int? east { get; set; }
@@ -327,7 +291,10 @@ namespace Level_Data
             public int startX { get; set; }
             public int startY { get; set; }
             public int lives { get; set; }
+            public List<Item> items { get; set; }
+
+
         }
-	}
+    }
 }
 
