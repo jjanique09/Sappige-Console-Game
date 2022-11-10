@@ -47,6 +47,13 @@ namespace Level_Data
 
         public class PlainDoor : Door
         {
+            public JToken DoorToken { get; set; }
+            
+            public PlainDoor(JToken doorToken)
+            {
+                DoorToken = doorToken;
+            }
+
             public bool Open(Game game)
             {
                 return true;
@@ -72,43 +79,104 @@ namespace Level_Data
 
         public class ColoredDoorDecorator : DoorDecorator
         {
-            public ColoredDoorDecorator(Door door) : base(door)
+            public ColoredDoorDecorator(Door door,string color) : base(door) 
             {
             }
             public override bool Open(Game game)
             {
-                if (door.Open(game) == true)
-                {
-                    if (game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
+                    if (door.Open(game) == true && game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
                     {
                         return true;
                     }
-                    else { return false; }
-                }
-                else { return false; }
+                    else 
+                    { 
+                        return false; 
+                    }
             }
         }
 
 
-        public class VegPizzaDecorator : DoorDecorator
+        public class OpenOnOddDoorDecorator : DoorDecorator
         {
-            public VegPizzaDecorator(Door door) : base(door)
+            public OpenOnOddDoorDecorator(Door door) : base(door)
             {
             }
             public override bool Open(Game game)
             {
-                if (door.Open(game) == true)
-                {
-                    if (game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
+                    if (door.Open(game) == true && game.player.items.Where(x=>x.type.Equals("sankara stone")).Count()%2 != 0)
                     {
                         return true;
                     }
-                    else { return false; }
-                }
-                else { return false; }
+                    else 
+                    { 
+                        return false; 
+                    }
             }
         }
 
+
+        public class OpenOnStonesInRoomDoorDecorator : DoorDecorator
+        {
+            public int numberOfStones { get; set; }
+            public OpenOnStonesInRoomDoorDecorator(Door door,int setNumberOfStones) : base(door)
+            {
+                numberOfStones = setNumberOfStones;
+            }
+            public override bool Open(Game game)
+            {
+                if (door.Open(game) == true && game.rooms[game.player.startRoomId].items.Where(x => x.type.Equals("sankara stone")).Count() == numberOfStones)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public class ToggleDoorDecorator : DoorDecorator
+        {
+            public bool toggle { get; set; }
+            public ToggleDoorDecorator(Door door) : base(door)
+            {
+                toggle = true;
+            }
+            public override bool Open(Game game)
+            {
+                if (toggle == true)
+                {
+                    toggle = false;
+                    return true;
+                }
+                else
+                {
+                    toggle = true;
+                    return false;
+                }
+            }
+        }
+
+        public class ClosingDoorDecorator : DoorDecorator
+        {
+            public bool toggle { get; set; }
+            public ClosingDoorDecorator(Door door) : base(door)
+            {
+                toggle = true;
+            }
+            public override bool Open(Game game)
+            {
+                if (toggle == true)
+                {
+                    toggle = false;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
 
         public Player CreatePlayer()
         {
@@ -174,7 +242,6 @@ namespace Level_Data
 
                 List<Door> doors = new List<Door>();
                 if (connection["doors"] != null) { setConnection.door = CreateDoors(JToken.FromObject(connection["doors"])); }
-               // if (connection["doors"] != null) { CreateDoors(JToken.FromObject(connection["doors"])); }
                 connections.Add(setConnection);
             }
             return connections;
@@ -191,23 +258,24 @@ namespace Level_Data
 
                 if (firstInitilizer == true)
                 {
-                    PlainDoor doorObj = new PlainDoor();
+                    PlainDoor doorObj = new PlainDoor(doorToken);
                     string type = jsonItem["type"].Value<string>();
-                    if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj); Console.Write("You Decorated Colors with"); }
-                    if (type.Equals("open on odd")) { doorDecorator = new VegPizzaDecorator(doorObj); Console.Write("You Decorated Open On Odd with"); }
+                     
+                    if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); Console.Write("You Decorated Colors with"); }
+                    if (type.Equals("open on odd")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj); Console.Write("You Decorated Open On Odd with"); }
 
                     //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit moet een 1 zijn verdikkie " + doorToken.Count());
                     //Console.WriteLine(doorToken.Count());
                     firstInitilizer = false;
-                    if (doorToken.Count() == 1) { return doorDecorator;} // fixes the one issue but 2's still run twice
+                    if (doorToken.Count() == 1) { return doorDecorator;} 
                 }
                 else
                 {
                     //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit mag geen 1 zijn verdikkie " + doorToken.Count());
                     Door? xDecorator = null;
                     string type = jsonItem["type"].Value<string>();
-                    if (type.Equals("colored")) { xDecorator = new ColoredDoorDecorator(doorDecorator); Console.Write("Colored"); }
-                    if (type.Equals("open on odd")) { xDecorator = new VegPizzaDecorator(doorDecorator); Console.Write(" Open On Odd"); } 
+                    if (type.Equals("colored")) { xDecorator = new ColoredDoorDecorator(doorDecorator, jsonItem["color"].Value<string>()); Console.Write("Colored"); }
+                    if (type.Equals("open on odd")) { xDecorator = new OpenOnOddDoorDecorator(doorDecorator); Console.Write(" Open On Odd"); } 
                     
                     return xDecorator;
                 }
