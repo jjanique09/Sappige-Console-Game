@@ -24,7 +24,7 @@
         var type = jsonItem["type"].Value<string>();
         Door a = new Door();
 
-
+hkhkh 
         PlainDoor plainPizzaObj = new PlainDoor();
         DoorDecorator chickenPizzaDecorator = new ColoredDoorDecorator(plainPizzaObj);
         Door vegPizzaDecorator = new VegPizzaDecorator(chickenPizzaDecorator);

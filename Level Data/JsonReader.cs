@@ -13,7 +13,7 @@ namespace Level_Data
         {
             List<Connection> connections = CreateConnection(GameJsonObj);
             var list = data as List<string>;
-            list.Sort();
+            list.Sort();                                                                                                                                                                                                                                                                                                                                                                                                                 
             return list;
         }
 
@@ -34,8 +34,9 @@ namespace Level_Data
                 }
                 Console.ForegroundColor = ConsoleColor.Blue;
             }
-
             Console.ForegroundColor = ConsoleColor.White;
+
+            
         }
 
 
@@ -173,6 +174,7 @@ namespace Level_Data
                 }
                 else
                 {
+                    toggle = true;
                     return false;
                 }
             }
@@ -211,7 +213,7 @@ namespace Level_Data
         }
 
 
-        private List<Item> CreateRoomItems(JToken items) /// Convert to Factory -> That also adds pickup/step-on logic.
+        private List<Item> CreateRoomItems(JToken items) 
         {
             List<Item> itemList = new List<Item>();
             foreach (var jsonItem in items)
@@ -283,44 +285,6 @@ namespace Level_Data
             return doorDecorator;
         }
            
-
-
-
-        /// Old Code
-   /*     private Door CreateDoors(JToken items)
-        {
-            Door itemList = new Door();
-            foreach (var jsonItem in items)
-            {
-                var type = jsonItem["type"].Value<string>();
-                //Door a = new Door();
-
-
-                PlainDoor plainPizzaObj = new PlainDoor();
-                DoorDecorator chickenPizzaDecorator = new ColoredDoorDecorator(plainPizzaObj);
-                Door vegPizzaDecorator = new VegPizzaDecorator(chickenPizzaDecorator);
-
-                Console.WriteLine("1 " + chickenPizzaDecorator.Open());
-                Console.WriteLine("1 " + vegPizzaDecorator.Open());
-
-            }
-            return itemList;
-        }*/
-
-
-
-        /// <summary>
-        /// 
-        /// These Classes are currently internal but have to become a external.
-        /// The classes are in this class while the development of the decorators is 
-        /// because this allows me to develop faster without having to jump around classes
-        /// 
-        /// </summary>
-
-
-
-
-        
         public class Game
         {
             public Game(Player setPlayer, List<Connection> setConnections, List<Room> setRooms)
