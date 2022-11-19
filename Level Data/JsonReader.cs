@@ -36,7 +36,7 @@ namespace Level_Data
             }
             Console.ForegroundColor = ConsoleColor.White;
 
-            
+
         }
 
 
@@ -213,7 +213,7 @@ namespace Level_Data
         }
 
 
-        private List<Item> CreateRoomItems(JToken items) 
+        private List<Item> CreateRoomItems(JToken items)  /// This will become an Item Factory ---> https://www.c-sharpcorner.com/article/factory-design-pattern-in-c-sharp/
         {
             List<Item> itemList = new List<Item>();
             foreach (var jsonItem in items)
@@ -261,8 +261,8 @@ namespace Level_Data
                 if (firstInitilizer == true)
                 {
                     PlainDoor doorObj = new PlainDoor(doorToken);
+                    //Door? doorObj = new PlainDoor(doorToken);
                     string type = jsonItem["type"].Value<string>();
-                     
                     if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); Console.Write("You Decorated Colors with"); }
                     if (type.Equals("open on odd")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj); Console.Write("You Decorated Open On Odd with"); }
 
