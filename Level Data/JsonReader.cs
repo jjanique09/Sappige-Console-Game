@@ -1,25 +1,20 @@
-﻿using Newtonsoft.Json;
+﻿
 using Newtonsoft.Json.Linq;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using static Level_Data.JsonReader;
 using static Level_Data.JsonReader.ItemFactory;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Level_Data
 {
     class JsonReader : IStrategy
     {
 
-        JObject GameJsonObj = JObject.Parse(File.ReadAllText(@"../LevelDataJson.json"));
+        JObject GameJsonObj = JObject.Parse(File.ReadAllText("C:\\Users\\joram\\Documents\\LevelDataJson.json"));
         public object DoAlgorithm(object data)
         {
-            List<Connection> connections = CreateConnection(GameJsonObj);
+            List<Connection> connections = ItemFactory.CreateConnection(GameJsonObj);
             var list = data as List<string>;
             list.Sort();
             return list;
         }
-
 
         public void PrintLoadedGameData()
         {
@@ -201,8 +196,8 @@ namespace Level_Data
             List<Room> roomList = new List<Room>();
             foreach (var room in GameJsonObj["rooms"])
             {
-                List<Iitem> setItems = new List<Item>();
-                if (room["items"] != null) { setItems = CreateRoomItems(JToken.FromObject(room["items"])); }
+                List<Iitem> setItems = new List<Iitem>();
+                if (room["items"] != null) { setItems = ItemFactory.CreateRoomItems(JToken.FromObject(room["items"])); }
                 roomList.Add(new Room
                 {
                     id = room["id"].Value<int>(),
@@ -312,7 +307,7 @@ namespace Level_Data
 
             public void Use(Game game)
             {
-                game.rooms.Where(x => x.id == game.player.startRoomId).First().items.Remove(e => e.type.Equals("disappearing boobytrap") && e.x == x && e.y == y);
+                game.rooms.Where(x => x.id == game.player.startRoomId).First().items.RemoveAll(e => e.type.Equals("disappearing boobytrap") && e.x == x && e.y == y);
                 game.player.lives -= damage.Value;
             }
         }
@@ -359,7 +354,8 @@ namespace Level_Data
 
             public Iitem CreateItem()
             {
-                if ("sankara stone".Equals(type)) {
+                if ("sankara stone".Equals(type))
+                {
                     return new SankaraStoneItem(type, color, x, y, damage);
                 }
 
@@ -388,139 +384,140 @@ namespace Level_Data
                     return new KeyItem(type, color, x, y, damage);
                 }
 
-            return null;
+                return null;
 
             }
 
 
-        private List<Iitem> CreateRoomItems(JToken items)  /// This will become an Item Factory ---> https://www.c-sharpcorner.com/article/factory-design-pattern-in-c-sharp/
-        {
-            List<Iitem> itemList = new List<Iitem>();
-            foreach (var jsonItem in items)
+            public static List<Iitem> CreateRoomItems(JToken items)  /// This will become an Item Factory ---> https://www.c-sharpcorner.com/article/factory-design-pattern-in-c-sharp/
             {
+                List<Iitem> itemList = new List<Iitem>();
+                foreach (var jsonItem in items)
+                {
                     ItemFactory itemFactory = new ItemFactory(jsonItem["type"].Value<string>(), jsonItem["color"].Value<string>(), jsonItem["x"].Value<int>(), jsonItem["y"].Value<int>(), jsonItem["damage"].Value<int>());
                     itemList.Add(itemFactory.CreateItem());
-            }
-            return itemList;
-        }
-
-
-        public List<Connection> CreateConnection(JObject json)
-        {
-            var connections = new List<Connection>();
-            foreach (var connection in json["connections"])
-            {
-                
-                Connection setConnection = new Connection();
-                if (connection["NORTH"] != null) { setConnection.north = connection["NORTH"].Value<int?>(); }
-                if (connection["EAST"] != null) { setConnection.east = connection["EAST"].Value<int?>(); }
-                if (connection["WEST"] != null) { setConnection.west = connection["WEST"].Value<int?>(); }
-                if (connection["SOUTH"] != null) { setConnection.south = connection["SOUTH"].Value<int?>(); }
-
-                List<Door> doors = new List<Door>();
-                if (connection["doors"] != null) { setConnection.door = CreateDoors(JToken.FromObject(connection["doors"])); }
-                connections.Add(setConnection);
-            }
-            return connections;
-        }
-
-
-
-
-        private Door CreateDoors(JToken doorToken)
-        {
-            bool firstInitilizer = true;
-            DoorDecorator? doorDecorator = null;
-            Console.WriteLine("");
-            foreach (var jsonItem in doorToken)
-            {
-               
-                if (firstInitilizer == true)
-                {
-                    PlainDoor doorObj = new PlainDoor(doorToken);
-                    //Door? doorObj = new PlainDoor(doorToken);
-                    string type = jsonItem["type"].Value<string>();
-                    if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); } 
-                    if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorObj, jsonItem["no_of_stones"].Value<int>()); }
-                    if (type.Equals("open on odd")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj);}
-                    if (type.Equals("toggle")) { doorDecorator = new ToggleDoorDecorator(doorObj);  }
-                    if (type.Equals("closing gate")) { doorDecorator = new ClosingDoorDecorator(doorObj);  }
-      
-
-                    //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit moet een 1 zijn verdikkie " + doorToken.Count());
-                    //Console.WriteLine(doorToken.Count());
-                    firstInitilizer = false;
-                    if (doorToken.Count() == 1) { return doorDecorator;} 
                 }
-                else
-                {
-                    //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit mag geen 1 zijn verdikkie " + doorToken.Count());
-                    Door? xDecorator = null;
-                    string type = jsonItem["type"].Value<string>();
-                    if (type.Equals("colored")) { xDecorator = new ColoredDoorDecorator(doorDecorator, jsonItem["color"].Value<string>()); }
-                    if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorDecorator, jsonItem["no_of_stones"].Value<int>()); }
-                    if (type.Equals("open on odd")) { xDecorator = new OpenOnOddDoorDecorator(doorDecorator); } 
-                    if (type.Equals("toggle")) { xDecorator = new ToggleDoorDecorator(doorDecorator); }
-                    if (type.Equals("closing gate")) { xDecorator = new ClosingDoorDecorator(doorDecorator); } 
-                    
-
-                    return xDecorator;
-                }
+                return itemList;
             }
-            return doorDecorator;
-        }
-           
-        public class Game
-        {
-            public Game(Player setPlayer, List<Connection> setConnections, List<Room> setRooms)
+
+
+            public static List<Connection> CreateConnection(JObject json)
             {
-                player = setPlayer;
-                connections = setConnections;
-                rooms = setRooms;
+                var connections = new List<Connection>();
+                foreach (var connection in json["connections"])
+                {
+
+                    Connection setConnection = new Connection();
+                    if (connection["NORTH"] != null) { setConnection.north = connection["NORTH"].Value<int?>(); }
+                    if (connection["EAST"] != null) { setConnection.east = connection["EAST"].Value<int?>(); }
+                    if (connection["WEST"] != null) { setConnection.west = connection["WEST"].Value<int?>(); }
+                    if (connection["SOUTH"] != null) { setConnection.south = connection["SOUTH"].Value<int?>(); }
+
+                    List<Door> doors = new List<Door>();
+                    if (connection["doors"] != null) { setConnection.door = CreateDoors(JToken.FromObject(connection["doors"])); }
+                    connections.Add(setConnection);
+                }
+                return connections;
             }
-            
-            public Player player { get; set; }
-            public List<Connection> connections { get; set; }
-            public List<Room> rooms { get; set; } 
-        }
-
-        public class Connection
-        {
-            public int? north { get; set; }
-            public int? east { get; set; }
-            public int? south { get; set; }
-            public int? west { get; set; }
-            public Door door { get; set; }
-        }
 
 
-/*        public class Item 
-        {
-           public string type { get; set; }
-           public string? color { get; set; }
-           public int x { get; set; }
-           public int y { get; set; }
-           public int? damage { get; set; }
-        }
-*/
-
-        public class Room
-        {
-            public int id { get; set; }
-            public int width { get; set; }
-            public int height { get; set; }
-            public string type { get; set; }
-            public List<Iitem> items { get; set; }
-        }
 
 
-        public class Player
-        {
-            public int startRoomId { get; set; }
-            public int startX { get; set; }
-            public int startY { get; set; }
-            public int lives { get; set; }
-            public List<Iitem> items { get; set; }
+            private static Door CreateDoors(JToken doorToken)
+            {
+                bool firstInitilizer = true;
+                DoorDecorator? doorDecorator = null;
+                Console.WriteLine("");
+                foreach (var jsonItem in doorToken)
+                {
+
+                    if (firstInitilizer == true)
+                    {
+                        PlainDoor doorObj = new PlainDoor(doorToken);
+                        //Door? doorObj = new PlainDoor(doorToken);
+                        string type = jsonItem["type"].Value<string>();
+                        if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); }
+                        if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorObj, jsonItem["no_of_stones"].Value<int>()); }
+                        if (type.Equals("open on odd")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj); }
+                        if (type.Equals("toggle")) { doorDecorator = new ToggleDoorDecorator(doorObj); }
+                        if (type.Equals("closing gate")) { doorDecorator = new ClosingDoorDecorator(doorObj); }
+
+
+                        //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit moet een 1 zijn verdikkie " + doorToken.Count());
+                        //Console.WriteLine(doorToken.Count());
+                        firstInitilizer = false;
+                        if (doorToken.Count() == 1) { return doorDecorator; }
+                    }
+                    else
+                    {
+                        //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit mag geen 1 zijn verdikkie " + doorToken.Count());
+                        Door? xDecorator = null;
+                        string type = jsonItem["type"].Value<string>();
+                        if (type.Equals("colored")) { xDecorator = new ColoredDoorDecorator(doorDecorator, jsonItem["color"].Value<string>()); }
+                        if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorDecorator, jsonItem["no_of_stones"].Value<int>()); }
+                        if (type.Equals("open on odd")) { xDecorator = new OpenOnOddDoorDecorator(doorDecorator); }
+                        if (type.Equals("toggle")) { xDecorator = new ToggleDoorDecorator(doorDecorator); }
+                        if (type.Equals("closing gate")) { xDecorator = new ClosingDoorDecorator(doorDecorator); }
+
+
+                        return xDecorator;
+                    }
+                }
+                return doorDecorator;
+            }
+
+            public class Game
+            {
+                public Game(Player setPlayer, List<Connection> setConnections, List<Room> setRooms)
+                {
+                    player = setPlayer;
+                    connections = setConnections;
+                    rooms = setRooms;
+                }
+
+                public Player player { get; set; }
+                public List<Connection> connections { get; set; }
+                public List<Room> rooms { get; set; }
+            }
+
+            public class Connection
+            {
+                public int? north { get; set; }
+                public int? east { get; set; }
+                public int? south { get; set; }
+                public int? west { get; set; }
+                public Door door { get; set; }
+            }
+
+
+            /*        public class Item 
+                    {
+                       public string type { get; set; }
+                       public string? color { get; set; }
+                       public int x { get; set; }
+                       public int y { get; set; }
+                       public int? damage { get; set; }
+                    }
+            */
+
+            public class Room
+            {
+                public int id { get; set; }
+                public int width { get; set; }
+                public int height { get; set; }
+                public string type { get; set; }
+                public List<Iitem> items { get; set; }
+            }
+
+
+            public class Player
+            {
+                public int startRoomId { get; set; }
+                public int startX { get; set; }
+                public int startY { get; set; }
+                public int lives { get; set; }
+                public List<Iitem> items { get; set; }
+            }
         }
     }
 }
