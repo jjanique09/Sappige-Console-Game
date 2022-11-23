@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using static Level_Data.JsonReader;
+using static Level_Data.JsonReader.ItemFactory;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Level_Data
 {
@@ -13,7 +16,7 @@ namespace Level_Data
         {
             List<Connection> connections = CreateConnection(GameJsonObj);
             var list = data as List<string>;
-            list.Sort();                                                                                                                                                                                                                                                                                                                                                                                                                 
+            list.Sort();
             return list;
         }
 
@@ -49,7 +52,7 @@ namespace Level_Data
         public class PlainDoor : Door
         {
             public JToken DoorToken { get; set; }
-            
+
             public PlainDoor(JToken doorToken)
             {
                 DoorToken = doorToken;
@@ -80,19 +83,19 @@ namespace Level_Data
 
         public class ColoredDoorDecorator : DoorDecorator
         {
-            public ColoredDoorDecorator(Door door,string color) : base(door) 
+            public ColoredDoorDecorator(Door door, string color) : base(door)
             {
             }
             public override bool Open(Game game)
             {
-                    if (door.Open(game) == true && game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
-                    {
-                        return true;
-                    }
-                    else 
-                    { 
-                        return false; 
-                    }
+                if (door.Open(game) == true && game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
@@ -104,14 +107,14 @@ namespace Level_Data
             }
             public override bool Open(Game game)
             {
-                    if (door.Open(game) == true && game.player.items.Where(x=>x.type.Equals("sankara stone")).Count()%2 != 0)
-                    {
-                        return true;
-                    }
-                    else 
-                    { 
-                        return false; 
-                    }
+                if (door.Open(game) == true && game.player.items.Where(x => x.type.Equals("sankara stone")).Count() % 2 != 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
@@ -119,7 +122,7 @@ namespace Level_Data
         public class OpenOnStonesInRoomDoorDecorator : DoorDecorator
         {
             public int numberOfStones { get; set; }
-            public OpenOnStonesInRoomDoorDecorator(Door door,int setNumberOfStones) : base(door)
+            public OpenOnStonesInRoomDoorDecorator(Door door, int setNumberOfStones) : base(door)
             {
                 numberOfStones = setNumberOfStones;
             }
@@ -198,7 +201,7 @@ namespace Level_Data
             List<Room> roomList = new List<Room>();
             foreach (var room in GameJsonObj["rooms"])
             {
-                List<Item> setItems = new List<Item>();
+                List<Iitem> setItems = new List<Item>();
                 if (room["items"] != null) { setItems = CreateRoomItems(JToken.FromObject(room["items"])); }
                 roomList.Add(new Room
                 {
@@ -212,20 +215,191 @@ namespace Level_Data
             return roomList;
         }
 
-
-        private List<Item> CreateRoomItems(JToken items)  /// This will become an Item Factory ---> https://www.c-sharpcorner.com/article/factory-design-pattern-in-c-sharp/
+        public interface Iitem
         {
-            List<Item> itemList = new List<Item>();
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+            public void Use(Game game);
+        }
+
+        public class SankaraStoneItem : Iitem
+        {
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+            public SankaraStoneItem(string setType, string? setColor, int setX, int setY, int? setDamage)
+            {
+                type = setType;
+                color = setColor;
+                x = setX;
+                y = setY;
+                damage = setDamage;
+            }
+
+            public void Use(Game game)
+            {
+                game.player.items.Add(new SankaraStoneItem(type, color, x, y, damage));
+            }
+        }
+
+
+        public class KeyItem : Iitem
+        {
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+            public KeyItem(string setType, string? setColor, int setX, int setY, int? setDamage)
+            {
+                type = setType;
+                color = setColor;
+                x = setX;
+                y = setY;
+                damage = setDamage;
+            }
+
+            public void Use(Game game)
+            {
+                game.player.items.Add(new SankaraStoneItem(type, color, x, y, damage));
+            }
+        }
+
+
+        public class BoobyTrapItem : Iitem
+        {
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+            public BoobyTrapItem(string setType, string? setColor, int setX, int setY, int? setDamage)
+            {
+                type = setType;
+                color = setColor;
+                x = setX;
+                y = setY;
+                damage = setDamage;
+            }
+
+            public void Use(Game game)
+            {
+                game.player.lives -= damage.Value;
+            }
+        }
+
+
+        public class DisapearingBoobyTrapItem : Iitem
+        {
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+            public DisapearingBoobyTrapItem(string setType, string? setColor, int setX, int setY, int? setDamage)
+            {
+                type = setType;
+                color = setColor;
+                x = setX;
+                y = setY;
+                damage = setDamage;
+            }
+
+            public void Use(Game game)
+            {
+                game.rooms.Where(x => x.id == game.player.startRoomId).First().items.Remove(e => e.type.Equals("disappearing boobytrap") && e.x == x && e.y == y);
+                game.player.lives -= damage.Value;
+            }
+        }
+
+        public class PressurePlateItem : Iitem // What the hell does this do?
+        {
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+            public PressurePlateItem(string setType, string? setColor, int setX, int setY, int? setDamage)
+            {
+                type = setType;
+                color = setColor;
+                x = setX;
+                y = setY;
+                damage = setDamage;
+            }
+
+            public void Use(Game game)
+            {
+                game.player.items.Add(new PressurePlateItem(type, color, x, y, damage));
+            }
+        };
+
+        public class ItemFactory
+        {
+
+            public string type { get; set; }
+            public string? color { get; set; }
+            public int x { get; set; }
+            public int y { get; set; }
+            public int? damage { get; set; }
+
+            public ItemFactory(string setType, string? setColor, int setX, int setY, int? setDamage)
+            {
+                type = setType;
+                color = setColor;
+                x = setX;
+                y = setY;
+                damage = setDamage;
+            }
+
+            public Iitem CreateItem()
+            {
+                if ("sankara stone".Equals(type)) {
+                    return new SankaraStoneItem(type, color, x, y, damage);
+                }
+
+                else if ("sankara stone".Equals(type))
+                {
+                    return new BoobyTrapItem(type, color, x, y, damage);
+                }
+
+                else if ("sankara stone".Equals(type))
+                {
+                    return new DisapearingBoobyTrapItem(type, color, x, y, damage);
+                }
+
+                else if ("sankara stone".Equals(type))
+                {
+                    return new PressurePlateItem(type, color, x, y, damage);
+                }
+
+                else if ("sankara stone".Equals(type))
+                {
+                    return new SankaraStoneItem(type, color, x, y, damage);
+                }
+
+                else if ("key".Equals(type))
+                {
+                    return new KeyItem(type, color, x, y, damage);
+                }
+
+            return null;
+
+            }
+
+
+        private List<Iitem> CreateRoomItems(JToken items)  /// This will become an Item Factory ---> https://www.c-sharpcorner.com/article/factory-design-pattern-in-c-sharp/
+        {
+            List<Iitem> itemList = new List<Iitem>();
             foreach (var jsonItem in items)
             {
-                itemList.Add(new Item
-                {
-                    type = jsonItem["type"].Value<string>(),
-                    color = (jsonItem["color"] ?? "").Value<string>(),
-                    x = jsonItem["x"].Value<int>(),
-                    y = jsonItem["y"].Value<int>(),
-                    damage = (jsonItem["damage"] ?? 0).Value<int>()
-                });
+                    ItemFactory itemFactory = new ItemFactory(jsonItem["type"].Value<string>(), jsonItem["color"].Value<string>(), jsonItem["x"].Value<int>(), jsonItem["y"].Value<int>(), jsonItem["damage"].Value<int>());
+                    itemList.Add(itemFactory.CreateItem());
             }
             return itemList;
         }
@@ -236,6 +410,7 @@ namespace Level_Data
             var connections = new List<Connection>();
             foreach (var connection in json["connections"])
             {
+                
                 Connection setConnection = new Connection();
                 if (connection["NORTH"] != null) { setConnection.north = connection["NORTH"].Value<int?>(); }
                 if (connection["EAST"] != null) { setConnection.east = connection["EAST"].Value<int?>(); }
@@ -250,6 +425,8 @@ namespace Level_Data
         }
 
 
+
+
         private Door CreateDoors(JToken doorToken)
         {
             bool firstInitilizer = true;
@@ -257,14 +434,18 @@ namespace Level_Data
             Console.WriteLine("");
             foreach (var jsonItem in doorToken)
             {
-
+               
                 if (firstInitilizer == true)
                 {
                     PlainDoor doorObj = new PlainDoor(doorToken);
                     //Door? doorObj = new PlainDoor(doorToken);
                     string type = jsonItem["type"].Value<string>();
-                    if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); Console.Write("You Decorated Colors with"); }
-                    if (type.Equals("open on odd")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj); Console.Write("You Decorated Open On Odd with"); }
+                    if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); } 
+                    if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorObj, jsonItem["no_of_stones"].Value<int>()); }
+                    if (type.Equals("open on odd")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj);}
+                    if (type.Equals("toggle")) { doorDecorator = new ToggleDoorDecorator(doorObj);  }
+                    if (type.Equals("closing gate")) { doorDecorator = new ClosingDoorDecorator(doorObj);  }
+      
 
                     //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit moet een 1 zijn verdikkie " + doorToken.Count());
                     //Console.WriteLine(doorToken.Count());
@@ -276,9 +457,13 @@ namespace Level_Data
                     //Uncomment check if continuity is still correct ---> // Console.WriteLine("Dit mag geen 1 zijn verdikkie " + doorToken.Count());
                     Door? xDecorator = null;
                     string type = jsonItem["type"].Value<string>();
-                    if (type.Equals("colored")) { xDecorator = new ColoredDoorDecorator(doorDecorator, jsonItem["color"].Value<string>()); Console.Write("Colored"); }
-                    if (type.Equals("open on odd")) { xDecorator = new OpenOnOddDoorDecorator(doorDecorator); Console.Write(" Open On Odd"); } 
+                    if (type.Equals("colored")) { xDecorator = new ColoredDoorDecorator(doorDecorator, jsonItem["color"].Value<string>()); }
+                    if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorDecorator, jsonItem["no_of_stones"].Value<int>()); }
+                    if (type.Equals("open on odd")) { xDecorator = new OpenOnOddDoorDecorator(doorDecorator); } 
+                    if (type.Equals("toggle")) { xDecorator = new ToggleDoorDecorator(doorDecorator); }
+                    if (type.Equals("closing gate")) { xDecorator = new ClosingDoorDecorator(doorDecorator); } 
                     
+
                     return xDecorator;
                 }
             }
@@ -309,7 +494,7 @@ namespace Level_Data
         }
 
 
-        public class Item 
+/*        public class Item 
         {
            public string type { get; set; }
            public string? color { get; set; }
@@ -317,7 +502,7 @@ namespace Level_Data
            public int y { get; set; }
            public int? damage { get; set; }
         }
-
+*/
 
         public class Room
         {
@@ -325,7 +510,7 @@ namespace Level_Data
             public int width { get; set; }
             public int height { get; set; }
             public string type { get; set; }
-            public List<Item> items { get; set; }
+            public List<Iitem> items { get; set; }
         }
 
 
@@ -335,7 +520,7 @@ namespace Level_Data
             public int startX { get; set; }
             public int startY { get; set; }
             public int lives { get; set; }
-            public List<Item> items { get; set; }
+            public List<Iitem> items { get; set; }
         }
     }
 }
