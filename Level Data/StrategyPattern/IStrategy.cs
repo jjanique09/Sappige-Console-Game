@@ -1,4 +1,4 @@
-﻿namespace Level_Data
+﻿namespace Level_Data.StrategyPattern
 {
     public interface IStrategy
     {

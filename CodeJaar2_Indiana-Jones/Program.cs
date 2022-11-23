@@ -1,5 +1,4 @@
-﻿
-using Level_Data;
+﻿using Level_Data.StrategyPattern;
 
 namespace Game_Logica
 {
