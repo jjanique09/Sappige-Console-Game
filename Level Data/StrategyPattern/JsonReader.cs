@@ -8,7 +8,9 @@ namespace Level_Data.StrategyPattern
         JObject GameJsonObj = JObject.Parse(File.ReadAllText(@"../LevelDataJson.json"));
         public Game CreateBasedOnFile()
         {
+
             return new Game(CreatePlayer(), CreateConnection(GameJsonObj), CreateRoom());
+          
         }
 
         
