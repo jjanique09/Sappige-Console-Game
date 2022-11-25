@@ -7,7 +7,7 @@ namespace Game_Logica
         static void Main(string[] args)
         {
             MainReader mainReader = new MainReader();
-            mainReader.ReadGameData();
+            Game game = mainReader.ReadGameData();
         }
 
     }

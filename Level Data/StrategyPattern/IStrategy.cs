@@ -2,7 +2,6 @@
 {
     public interface IStrategy
     {
-        object DoAlgorithm(object data);
+        Game CreateBasedOnFile();
     }
-
 }

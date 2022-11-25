@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using static Level_Data.StrategyPattern.ItemFactory;
 
 namespace Level_Data.StrategyPattern
 {
@@ -7,20 +6,12 @@ namespace Level_Data.StrategyPattern
     {
 
         JObject GameJsonObj = JObject.Parse(File.ReadAllText(@"../LevelDataJson.json"));
-        public object DoAlgorithm(object data)
+        public Game CreateBasedOnFile()
         {
-
-
-
-            PrintLoadedGameData(); 
-          /**/  List<Connection> connections = CreateConnection(GameJsonObj);
-            var list = data as List<string>;
-            list.Sort();
-            return list;
+            return new Game(CreatePlayer(), CreateConnection(GameJsonObj), CreateRoom());
         }
 
-
-
+        
         public Player CreatePlayer()
         {
             JToken player = GameJsonObj["player"];
@@ -33,7 +24,7 @@ namespace Level_Data.StrategyPattern
             };
         }
 
-
+        
         public List<Room> CreateRoom()
         {
             List<Room> roomList = new List<Room>();
@@ -84,8 +75,7 @@ namespace Level_Data.StrategyPattern
             }
             return connections;
         }
-
-
+        
         private static Door CreateDoors(JToken doorToken)
         {
             bool firstInitilizer = true;
@@ -120,7 +110,7 @@ namespace Level_Data.StrategyPattern
             return doorDecorator;
         }
 
-        public void PrintLoadedGameData() /// for testing purposes
+        public void PrintLoadedGameData() 
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nPrinted Player\n" + " Lives = " + CreatePlayer().lives + "\n StartX = " + CreatePlayer().startX + "\n StartY = " + CreatePlayer().startY + "\n StartRoomId = " + CreatePlayer().startRoomId);
