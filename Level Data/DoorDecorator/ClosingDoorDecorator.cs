@@ -10,16 +10,8 @@
             }
             public override bool Open(Game game)
             {
-                if (toggle == true)
-                {
-                    toggle = false;
-                    return true;
-                }
-                else
-                {
-                    toggle = true;
-                    return false;
-                }
+                   toggle = !toggle;
+                   return !toggle;
             }
         }
 }

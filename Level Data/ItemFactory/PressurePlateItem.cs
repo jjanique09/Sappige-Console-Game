@@ -20,7 +20,7 @@ namespace Level_Data.StrategyPattern
             public void Use(Game game)
             {
 
-                if (game.rooms.Where(x =>x.id == game.player.startRoomId).First().toggle == true)
+                if (game.rooms.Where(x =>x.id == game.player.startRoomId).First().toggle)
                 {
                     game.rooms.Where(x => x.id == game.player.startRoomId).First().toggle = false;
                 }

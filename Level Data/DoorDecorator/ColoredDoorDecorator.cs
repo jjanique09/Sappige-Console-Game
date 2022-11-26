@@ -10,14 +10,13 @@ namespace Level_Data.StrategyPattern
             }
             public override bool Open(Game game)
             {
-                if (door.Open(game) == true && game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
+                if (door.Open(game) && game.player.items.FindAll(x => x.type.Equals("key") && x.color.Equals("red")).Count() > 0)
                 {
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                
+            return false;
+                
             }
         }
     }

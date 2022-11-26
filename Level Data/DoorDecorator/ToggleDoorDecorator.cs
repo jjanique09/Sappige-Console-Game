@@ -10,15 +10,12 @@ namespace Level_Data.StrategyPattern
             
             public override bool Open(Game game)
             {
-                if (game.rooms.Where(x => x.id == game.player.startRoomId).First().toggle == true)
+                if (game.rooms.Where(x => x.id == game.player.startRoomId).First().toggle)
                 {
                     return true;
                 }
-
-                else 
-                {
-                    return false;
-                }
+             return false;
+             
             }
         
     }

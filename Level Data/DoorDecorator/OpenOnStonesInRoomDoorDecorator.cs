@@ -11,14 +11,12 @@ namespace Level_Data.StrategyPattern
             }
             public override bool Open(Game game)
             {
-                if (door.Open(game) == true && game.rooms[game.player.startRoomId].items.Where(x => x.type.Equals("sankara stone")).Count() == numberOfStones)
+                if (door.Open(game) && game.rooms[game.player.startRoomId].items.Where(x => x.type.Equals("sankara stone")).Count() == numberOfStones)
                 {
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
+                
             }
         
     }
