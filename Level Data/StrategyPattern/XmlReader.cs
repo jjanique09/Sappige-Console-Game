@@ -15,8 +15,8 @@ namespace Level_Data.StrategyPattern
 
             XmlDocument doc = new XmlDocument();
             doc.Load(@"../LevelDataXml.xml");
-
-            CreateRoom(doc);
+         
+           
         }
 
 
@@ -39,65 +39,53 @@ namespace Level_Data.StrategyPattern
                 lives = Int32.Parse(doc.GetElementsByTagName("player")[0].Attributes["lives"].Value),
             };
         }
+             /**//*if (roomNode.ChildNodes[8].Attributes["items"].Value != null) { setItems = CreateRoomItems(roomNode.ChildNodes[i].Attributes["items"]);*/
+    }
 
-        public List<Room> CreateRoom(XmlDocument doc)
+
+
+    public List<Room> CreateRoom(XmlDocument doc)
+    {
+        XmlNodeList roomNode = doc.DocumentElement.SelectNodes("/temple/rooms");
+        var test2 = roomNode[2].Attributes["items"].Value;
+        var test3 = roomNode[3].Attributes["items"].Value;
+        Console.ReadKey();
+
+        List<Room> roomList = new List<Room>();
+        for (int i = 0; i < roomNode.Count; i++)
         {
+            List<Iitem> setItems = new List<Iitem>();
 
-            XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
-           
-           
-            List<Room> roomList = new List<Room>();
-            for(int i = 0; i < roomNode.ChildNodes.Count; i++)
+            roomList.Add(new Room
             {
-                roomList.Add(new Room
-                {
-                    id = Int32.Parse(roomNode.ChildNodes[0].Attributes["id"].Value),
-                    width = 0,
-                    height = 0,
-                    type = null,
-                    items = null,
-                    toggle = false,
+                id = Int32.Parse(roomNode[i].Attributes["id"].Value),
+                width = Int32.Parse(roomNode[i].Attributes["width"].Value),
+                height = Int32.Parse(roomNode[i].Attributes["height"].Value),
+                type = null,
+                items = setItems,
+                toggle = true,
 
-                }) ;
-            }
-
-
-
-           /* foreach (var room in GameJsonObj["rooms"])
-            {
-                List<Iitem> setItems = new List<Iitem>();
-                if (room["items"] != null) { setItems = CreateRoomItems(JToken.FromObject(room["items"])); }
-                roomList.Add(new Room
-                {
-                    id = room["id"].Value<int>(),
-                    width = room["width"].Value<int>(),
-                    height = room["height"].Value<int>(),
-                    type = room["type"].Value<string>(),
-                    items = setItems,
-                    toggle = true
-                });
-            }*/
-           
-
+            });
 
 
 
             return roomList;
         }
+    }
 
-        public static List<Iitem> CreateRoomItems(JToken items)
+        public static List<Iitem> CreateRoomItems(XmlNode ItemNode)
         {
             List<Iitem> itemList = new List<Iitem>();
-            foreach (var jsonItem in items)
+            foreach (var node in ItemNode)
             {
-                ItemFactory itemFactory = new ItemFactory(jsonItem);
-                itemList.Add(itemFactory.ProduceItems());
+      /*          ItemFactory itemFactory = new ItemFactory(jsonItem);
+                itemList.Add(itemFactory.ProduceItems());*/
             }
             return itemList;
         }
 
 
-    }
+    
 }
 
 
