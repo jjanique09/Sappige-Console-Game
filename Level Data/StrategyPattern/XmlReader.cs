@@ -38,6 +38,42 @@ namespace Level_Data.StrategyPattern
             };
         }
 
+        public List<Room> CreateRoom(XmlDocument doc)
+        {
+
+            XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
+
+           
+            List<Room> roomList = new List<Room>();
+           /* foreach (var room in GameJsonObj["rooms"])
+            {
+                List<Iitem> setItems = new List<Iitem>();
+                if (room["items"] != null) { setItems = CreateRoomItems(JToken.FromObject(room["items"])); }
+                roomList.Add(new Room
+                {
+                    id = room["id"].Value<int>(),
+                    width = room["width"].Value<int>(),
+                    height = room["height"].Value<int>(),
+                    type = room["type"].Value<string>(),
+                    items = setItems,
+                    toggle = true
+                });
+            }*/
+            return roomList;
+        }
+
+        public static List<Iitem> CreateRoomItems(JToken items)
+        {
+            List<Iitem> itemList = new List<Iitem>();
+            foreach (var jsonItem in items)
+            {
+                ItemFactory itemFactory = new ItemFactory(jsonItem);
+                itemList.Add(itemFactory.ProduceItems());
+            }
+            return itemList;
+        }
+
+
     }
 }
 
