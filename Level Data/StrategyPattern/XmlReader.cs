@@ -49,24 +49,15 @@ namespace Level_Data.StrategyPattern
             List<XmlNode> rooms = new List<XmlNode>();
             
             XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
-            List<int> ids = new List<int>();
+           
             for (int i = 0; i < roomNode.ChildNodes.Count; i++)
             {
                 int id = Int32.Parse(roomNode.ChildNodes[i].Attributes["id"].Value);
-                ids.Add(id);
-              
-            }
-
-            for (int i = 0; i < roomNode.ChildNodes.Count; i++)
-            {
+                int width = Int32.Parse(roomNode.ChildNodes[i].Attributes["width"].Value);
+                int height = Int32.Parse(roomNode.ChildNodes[i].Attributes["height"].Value);
                 rooms.Add(roomNode.ChildNodes[i]);
-                Console.WriteLine(ids);
+
             }
-
-
-
-         /*   "<items><disappearing_boobytrap x=\"2\" y=\"1\" damage=\"1\" /><sankara_stone x=\"2\" y=\"2\" /></items>"*/
-
 
             List<XmlNode> lijstje = new List<XmlNode>();
             XmlDocument roomsDoc = new XmlDocument();
@@ -80,14 +71,33 @@ namespace Level_Data.StrategyPattern
                     {
                         lijstje.Add(itemNode.ChildNodes[i]);
                         int x = Int32.Parse(itemNode.ChildNodes[i].Attributes["x"].Value);
-                        int y = x;
+                        int y = Int32.Parse(itemNode.ChildNodes[i].Attributes["y"].Value);
+                        string type = itemNode.ChildNodes[i].LocalName;
+
+                        try
+                        {
+                            int damage = Int32.Parse(itemNode.ChildNodes[i].Attributes["damage"].Value);
+                        }
+                        catch
+                        {
+                            int damage = 0;
+                        }
+
+                        try
+                        {
+                            string color = (itemNode.ChildNodes[i].Attributes["color"].ToString());
+                        }
+                        catch
+                        {
+                            string color = "";
+                        }
+
                     }
                  }
                 }
 
 
-
-            List<XmlNode> Axls = rooms;
+          
             List<Room> roomList = new List<Room>();
 
             return roomList;
