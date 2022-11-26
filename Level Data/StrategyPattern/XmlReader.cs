@@ -15,6 +15,7 @@ namespace Level_Data.StrategyPattern
 
             XmlDocument doc = new XmlDocument();
             doc.Load(@"../LevelDataXml.xml");
+            CreateRoom(doc);
         }
 
 
@@ -44,29 +45,50 @@ namespace Level_Data.StrategyPattern
 
         public List<Room> CreateRoom(XmlDocument doc)
         {
-            XmlNodeList roomNode = doc.DocumentElement.SelectNodes("/temple/rooms");
-            var test2 = roomNode[2].Attributes["items"].Value;
-            var test3 = roomNode[3].Attributes["items"].Value;
-            Console.ReadKey();
 
-            List<Room> roomList = new List<Room>();
-            for (int i = 0; i < roomNode.Count; i++)
+            List<XmlNode> xmls = new List<XmlNode>();
+            
+            XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
+            List<int> ids = new List<int>();
+            for (int i = 0; i < roomNode.ChildNodes.Count; i++)
             {
-                List<Iitem> setItems = new List<Iitem>();
-
-                roomList.Add(new Room
-                {
-                    id = Int32.Parse(roomNode[i].Attributes["id"].Value),
-                    width = Int32.Parse(roomNode[i].Attributes["width"].Value),
-                    height = Int32.Parse(roomNode[i].Attributes["height"].Value),
-                    type = null,
-                    items = setItems,
-                    toggle = true,
-
-                });
+                int id = Int32.Parse(roomNode.ChildNodes[i].Attributes["id"].Value);
+                ids.Add(id);
+              
             }
-            return roomList;
 
+            for (int i = 0; i < roomNode.ChildNodes.Count; i++)
+            {
+                xmls.Add(roomNode.ChildNodes[i]);
+                Console.WriteLine(ids);
+            }
+
+
+
+         /*   "<items><disappearing_boobytrap x=\"2\" y=\"1\" damage=\"1\" /><sankara_stone x=\"2\" y=\"2\" /></items>"*/
+
+            XmlDocument rooms = new XmlDocument();
+            foreach (var node in xmls)
+            {
+                if (node.InnerXml != "") {
+                    rooms.LoadXml (node.InnerXml);
+                    XmlNode itemNode = rooms.DocumentElement.SelectSingleNode("/items");
+
+                    foreach (var item in itemNode)
+                    {
+                        int x = Int32.Parse(itemNode.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "x").First().InnerText);
+                       
+                        Console.WriteLine(x);
+                        }
+                }
+                }
+
+
+
+            List<XmlNode> Axls = xmls;
+            List<Room> roomList = new List<Room>();
+
+            return roomList;
         }
 
     }
