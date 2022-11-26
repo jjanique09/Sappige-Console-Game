@@ -15,6 +15,8 @@ namespace Level_Data.StrategyPattern
 
             XmlDocument doc = new XmlDocument();
             doc.Load(@"../LevelDataXml.xml");
+
+            CreateRoom(doc);
         }
 
 
@@ -42,9 +44,25 @@ namespace Level_Data.StrategyPattern
         {
 
             XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
-
+           
            
             List<Room> roomList = new List<Room>();
+            for(int i = 0; i < roomNode.ChildNodes.Count; i++)
+            {
+                roomList.Add(new Room
+                {
+                    id = Int32.Parse(roomNode.ChildNodes[0].Attributes["id"].Value),
+                    width = 0,
+                    height = 0,
+                    type = null,
+                    items = null,
+                    toggle = false,
+
+                }) ;
+            }
+
+
+
            /* foreach (var room in GameJsonObj["rooms"])
             {
                 List<Iitem> setItems = new List<Iitem>();
@@ -59,6 +77,11 @@ namespace Level_Data.StrategyPattern
                     toggle = true
                 });
             }*/
+           
+
+
+
+
             return roomList;
         }
 
