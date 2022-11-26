@@ -38,70 +38,44 @@ namespace Level_Data.StrategyPattern
                 lives = Int32.Parse(doc.GetElementsByTagName("player")[0].Attributes["lives"].Value),
             };
         }
-        /**//*if (roomNode.ChildNodes[8].Attributes["items"].Value != null) { setItems = CreateRoomItems(roomNode.ChildNodes[i].Attributes["items"]);*/
-
-
-
 
         public List<Room> CreateRoom(XmlDocument doc)
         {
 
-            List<XmlNode> rooms = new List<XmlNode>();
-            
-            XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
-           
+             XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
+
             for (int i = 0; i < roomNode.ChildNodes.Count; i++)
             {
                 int id = Int32.Parse(roomNode.ChildNodes[i].Attributes["id"].Value);
                 int width = Int32.Parse(roomNode.ChildNodes[i].Attributes["width"].Value);
                 int height = Int32.Parse(roomNode.ChildNodes[i].Attributes["height"].Value);
-                rooms.Add(roomNode.ChildNodes[i]);
-
+                List<Iitem> items = CreateRoomItems(roomNode.ChildNodes[i]);
             }
-
-            List<XmlNode> lijstje = new List<XmlNode>();
-            XmlDocument roomsDoc = new XmlDocument();
-            foreach (var room in rooms) // each room
-            {
-                if (room.InnerXml != "") {
-                    roomsDoc.LoadXml (room.InnerXml);
-                    XmlNode itemNode = roomsDoc.DocumentElement.SelectSingleNode("/items");
-
-                    for(int i = 0; i < itemNode.ChildNodes.Count; i++)
-                    {
-                        lijstje.Add(itemNode.ChildNodes[i]);
-                        int x = Int32.Parse(itemNode.ChildNodes[i].Attributes["x"].Value);
-                        int y = Int32.Parse(itemNode.ChildNodes[i].Attributes["y"].Value);
-                        string type = itemNode.ChildNodes[i].LocalName;
-
-                        try
-                        {
-                            int damage = Int32.Parse(itemNode.ChildNodes[i].Attributes["damage"].Value);
-                        }
-                        catch
-                        {
-                            int damage = 0;
-                        }
-
-                        try
-                        {
-                            string color = (itemNode.ChildNodes[i].Attributes["color"].ToString());
-                        }
-                        catch
-                        {
-                            string color = "";
-                        }
-
-                    }
-                 }
-                }
-
-
-          
             List<Room> roomList = new List<Room>();
-
             return roomList;
         }
+
+        private static List<Iitem> CreateRoomItems(XmlNode room)
+        {
+            List<XmlNode> lijstje = new List<XmlNode>();
+            XmlDocument roomsDoc = new XmlDocument();
+            List <Iitem> items = new List<Iitem>();
+            
+                if (room.InnerXml != "")
+                {
+                    roomsDoc.LoadXml(room.InnerXml);
+                    XmlNode itemNode = roomsDoc.DocumentElement.SelectSingleNode("/items");
+
+                    for (int i = 0; i < itemNode.ChildNodes.Count; i++)
+                    {   
+                    lijstje.Add(itemNode.ChildNodes[i]);
+                    ItemFactory itemFactory = new ItemFactory(itemNode.ChildNodes[i]);
+                    }
+                }
+            return items;
+        }
+
+
 
     }
 }

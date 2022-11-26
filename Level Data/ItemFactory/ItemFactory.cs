@@ -1,5 +1,7 @@
 ﻿
 using Newtonsoft.Json.Linq;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace Level_Data.StrategyPattern
 {
@@ -39,13 +41,39 @@ namespace Level_Data.StrategyPattern
             {
                 damage  = 0;
             }
+        }
+        
+        public ItemFactory(XmlNode xmlItem)
+        {
 
-
-
-
+            type = xmlItem.LocalName;
+            x = Int32.Parse(xmlItem.Attributes["x"].Value);
+            y = Int32.Parse(xmlItem.Attributes["y"].Value);
 
          
+                if (xmlItem.Attributes != null && xmlItem.Attributes["color"] != null)
+                {
+                    color = xmlItem.Attributes["color"].Value;
+                }
+                
+                else
+                {
+                    color = "";
+                }
+
+
+                if (xmlItem.Attributes != null && xmlItem.Attributes["damage"] != null)
+                {
+                    damage = Int32.Parse(xmlItem.Attributes["damage"].Value);
+                }
+
+                else
+                {
+                    damage = 0;
+                }
+
         }
+
 
         public Iitem ProduceItems()
             {

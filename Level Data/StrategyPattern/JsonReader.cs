@@ -52,6 +52,7 @@ namespace Level_Data.StrategyPattern
             List<Iitem> itemList = new List<Iitem>();
             foreach (var jsonItem in items)
             {
+                
                 ItemFactory itemFactory = new ItemFactory(jsonItem);
                 itemList.Add(itemFactory.ProduceItems());
             }
