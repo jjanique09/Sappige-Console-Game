@@ -16,6 +16,7 @@ namespace Level_Data.StrategyPattern
             XmlDocument doc = new XmlDocument();
             doc.Load(@"../LevelDataXml.xml");
             CreateRoom(doc);
+            CreateConnection(doc);
         }
 
 
@@ -75,10 +76,26 @@ namespace Level_Data.StrategyPattern
             return items;
         }
 
+        public static List<Connection> CreateConnection(XmlDocument doc)
+        {
+            XmlNode connectionNode = doc.DocumentElement.SelectSingleNode("/temple/connections");
+
+            for (int i = 0; i < connectionNode.ChildNodes.Count; i++)
+            {
+                Connection setConnection = new Connection();
+                    
+                if (connectionNode.ChildNodes[i].Attributes["NORTH"] != null ) { setConnection.north = Int32.Parse(connectionNode.ChildNodes[i].Attributes["NORTH"].Value); Console.WriteLine(setConnection.north); }
+             
+            }
+            List<Connection> connectionList = new List<Connection>();
+            return connectionList;
+        }
+    }
+
 
 
     }
-}
+
       
 
     

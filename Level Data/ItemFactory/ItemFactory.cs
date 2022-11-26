@@ -45,7 +45,6 @@ namespace Level_Data.StrategyPattern
         
         public ItemFactory(XmlNode xmlItem)
         {
-
             type = xmlItem.LocalName;
             x = Int32.Parse(xmlItem.Attributes["x"].Value);
             y = Int32.Parse(xmlItem.Attributes["y"].Value);
