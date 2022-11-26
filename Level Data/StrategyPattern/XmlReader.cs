@@ -16,13 +16,12 @@ namespace Level_Data.StrategyPattern
             doc.Load(@"../LevelDataXml.xml");
 
             XmlNode node = doc.DocumentElement.SelectSingleNode("/temple");
-            var RoomId = node.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "player lives").First().InnerText;
+            //var RoomId = node.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "player lives").First().InnerText;
+
+
+            // https://stackoverflow.com/questions/13605396/c-sharp-get-xml-tag-value
             
-
-
-
-
-
+            
             Console.WriteLine(node.FirstChild);
         }
 
@@ -36,14 +35,16 @@ namespace Level_Data.StrategyPattern
         {
 
             XmlNode node = doc.DocumentElement.SelectSingleNode("/temple/player/start");
+            XmlNode templeNode = doc.DocumentElement.SelectSingleNode("/temple/player");
 
             return new Player
             {
                 startY = Int32.Parse(node.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "y").First().InnerText),
                 startX = Int32.Parse(node.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "x").First().InnerText),
                 startRoomId = Int32.Parse(node.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "roomId").First().InnerText),
-                lives = 0,
-            };
+                lives = Int32.Parse(doc.GetElementsByTagName("player")[0].Attributes["lives"].Value),
+
+        };
         }
     }
 }
