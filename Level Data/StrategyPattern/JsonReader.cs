@@ -8,9 +8,7 @@ namespace Level_Data.StrategyPattern
         JObject GameJsonObj = JObject.Parse(File.ReadAllText(@"../LevelDataJson.json"));
         public Game CreateBasedOnFile()
         {
-
             return new Game(CreatePlayer(), CreateConnection(GameJsonObj), CreateRoom());
-          
         }
 
         
@@ -88,7 +86,7 @@ namespace Level_Data.StrategyPattern
 
                 if (firstInitilizer == true)
                 {
-                    PlainDoor doorObj = new PlainDoor(doorToken);
+                    PlainDoor doorObj = new PlainDoor();
                     string type = jsonItem["type"].Value<string>();
                     if (type.Equals("colored")) { doorDecorator = new ColoredDoorDecorator(doorObj, jsonItem["color"].Value<string>()); }
                     if (type.Equals("open on stones in room")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorObj, jsonItem["no_of_stones"].Value<int>()); }

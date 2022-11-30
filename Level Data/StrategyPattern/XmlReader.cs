@@ -10,22 +10,17 @@ namespace Level_Data.StrategyPattern
 
         public XmlReader()
         {
-            // https://stackoverflow.com/questions/642293/how-do-i-read-and-parse-an-xml-file-in-c
-            // https://stackoverflow.com/questions/13605396/c-sharp-get-xml-tag-value
 
-            XmlDocument doc = new XmlDocument();
-            doc.Load(@"../LevelDataXml.xml");
-            CreateRoom(doc);
-            CreateConnection(doc);
         }
-
 
         public Game CreateBasedOnFile()
         {
-            return new Game(null, null, null);
+            XmlDocument doc = new XmlDocument();
+            doc.Load(@"../LevelDataXml.xml");
+            Game game = new Game(CreatePlayer(doc), CreateConnection(doc), CreateRoom(doc));
+            return game;
         }
-
-
+        
         public Player CreatePlayer(XmlDocument doc)
         {
 
@@ -44,16 +39,19 @@ namespace Level_Data.StrategyPattern
         {
              XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
              List<Room> roomList = new List<Room>();
-            
+
+
             for (int i = 0; i < roomNode.ChildNodes.Count; i++)
             {
+                List<Iitem> setItems = new List<Iitem>();
+                if (roomNode.ChildNodes[i].InnerXml != "") { setItems = CreateRoomItems(roomNode.ChildNodes[i]); }
                 roomList.Add(new Room
                 {
                     id = Int32.Parse(roomNode.ChildNodes[i].Attributes["id"].Value),
                     width = Int32.Parse(roomNode.ChildNodes[i].Attributes["width"].Value),
                     height = Int32.Parse(roomNode.ChildNodes[i].Attributes["height"].Value),
-                    items = CreateRoomItems(roomNode.ChildNodes[i])
-                });
+                    items = setItems
+                }) ;
             }
             return roomList;
         }
@@ -89,10 +87,53 @@ namespace Level_Data.StrategyPattern
                 if (connectionNode.ChildNodes[i].Attributes["SOUTH"] != null ) { setConnection.south = Int32.Parse(connectionNode.ChildNodes[i].Attributes["SOUTH"].Value); Console.WriteLine(setConnection.south); }
                 if (connectionNode.ChildNodes[i].Attributes["WEST"] != null ) { setConnection.west = Int32.Parse(connectionNode.ChildNodes[i].Attributes["WEST"].Value); Console.WriteLine(setConnection.west); }
                 if (connectionNode.ChildNodes[i].Attributes["EAST"] != null ) { setConnection.east = Int32.Parse(connectionNode.ChildNodes[i].Attributes["EAST"].Value); Console.WriteLine(setConnection.east); }
+                if (connectionNode.ChildNodes[i].InnerXml != "") { setConnection.door = CreateRoomDoors(connectionNode.ChildNodes[i]); }
                 connectionList.Add(setConnection);
             }
-           
             return connectionList;
+        }
+
+
+        private static Door CreateRoomDoors(XmlNode room)
+        {
+            XmlDocument roomsDoc = new XmlDocument();
+            bool firstInitilizer = true;
+            DoorDecorator? doorDecorator = null;
+
+            if (room.InnerXml != "")
+            {
+                roomsDoc.LoadXml(room.InnerXml);
+                XmlNode itemNode = roomsDoc.DocumentElement.SelectSingleNode("/doors");
+
+                for (int i = 0; i < itemNode.ChildNodes.Count; i++)
+                {
+
+                    if (firstInitilizer == true)
+                    {
+                        PlainDoor doorObj = new PlainDoor();
+                        string type = itemNode.ChildNodes[i].LocalName;
+                        if (type.Equals("colouredDoor")) { doorDecorator = new ColoredDoorDecorator(doorObj, itemNode.ChildNodes[i].Attributes["color"].Value); }
+                        if (type.Equals("openOnStoneInRoomDoor")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorObj, Int32.Parse(itemNode.ChildNodes[i].Attributes["no_of_stones"].Value)); }
+                        if (type.Equals("openOnOddLivesDoor")) { doorDecorator = new OpenOnOddDoorDecorator(doorObj); }
+                        if (type.Equals("toggleDoor")) { doorDecorator = new ToggleDoorDecorator(doorObj); }
+                        if (type.Equals("closingGate")) { doorDecorator = new ClosingDoorDecorator(doorObj); }
+                        firstInitilizer = false;
+                        if (itemNode.ChildNodes.Count == 1) { return doorDecorator; }
+                    }
+                    else
+                    {
+                        Door? xDecorator = null;
+                        string type = itemNode.ChildNodes[i].LocalName;
+                        if (type.Equals("colouredDoor")) { xDecorator = new ColoredDoorDecorator(doorDecorator, itemNode.ChildNodes[i].Attributes["color"].Value); }
+                        if (type.Equals("openOnStoneInRoomDoor")) { doorDecorator = new OpenOnStonesInRoomDoorDecorator(doorDecorator, Int32.Parse(itemNode.ChildNodes[i].Attributes["no_of_stones"].Value)); }
+                        if (type.Equals("openOnOddLivesDoor")) { xDecorator = new OpenOnOddDoorDecorator(doorDecorator); }
+                        if (type.Equals("toggleDoor")) { xDecorator = new ToggleDoorDecorator(doorDecorator); }
+                        if (type.Equals("closingGate")) { xDecorator = new ClosingDoorDecorator(doorDecorator); }
+                        return xDecorator;
+                    }
+                }
+            }
+            return doorDecorator;
         }
     }
 
