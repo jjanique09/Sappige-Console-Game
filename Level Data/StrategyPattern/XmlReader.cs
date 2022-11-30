@@ -42,23 +42,24 @@ namespace Level_Data.StrategyPattern
 
         public List<Room> CreateRoom(XmlDocument doc)
         {
-
              XmlNode roomNode = doc.DocumentElement.SelectSingleNode("/temple/rooms");
-
+             List<Room> roomList = new List<Room>();
+            
             for (int i = 0; i < roomNode.ChildNodes.Count; i++)
             {
-                int id = Int32.Parse(roomNode.ChildNodes[i].Attributes["id"].Value);
-                int width = Int32.Parse(roomNode.ChildNodes[i].Attributes["width"].Value);
-                int height = Int32.Parse(roomNode.ChildNodes[i].Attributes["height"].Value);
-                List<Iitem> items = CreateRoomItems(roomNode.ChildNodes[i]);
+                roomList.Add(new Room
+                {
+                    id = Int32.Parse(roomNode.ChildNodes[i].Attributes["id"].Value),
+                    width = Int32.Parse(roomNode.ChildNodes[i].Attributes["width"].Value),
+                    height = Int32.Parse(roomNode.ChildNodes[i].Attributes["height"].Value),
+                    items = CreateRoomItems(roomNode.ChildNodes[i])
+                });
             }
-            List<Room> roomList = new List<Room>();
             return roomList;
         }
 
         private static List<Iitem> CreateRoomItems(XmlNode room)
         {
-            List<XmlNode> lijstje = new List<XmlNode>();
             XmlDocument roomsDoc = new XmlDocument();
             List <Iitem> items = new List<Iitem>();
             
@@ -69,8 +70,8 @@ namespace Level_Data.StrategyPattern
 
                     for (int i = 0; i < itemNode.ChildNodes.Count; i++)
                     {   
-                    lijstje.Add(itemNode.ChildNodes[i]);
                     ItemFactory itemFactory = new ItemFactory(itemNode.ChildNodes[i]);
+                    items.Add(itemFactory.ProduceItems());
                     }
                 }
             return items;
@@ -79,22 +80,23 @@ namespace Level_Data.StrategyPattern
         public static List<Connection> CreateConnection(XmlDocument doc)
         {
             XmlNode connectionNode = doc.DocumentElement.SelectSingleNode("/temple/connections");
-
+            List<Connection> connectionList = new List<Connection>();
+            
             for (int i = 0; i < connectionNode.ChildNodes.Count; i++)
             {
                 Connection setConnection = new Connection();
-                    
                 if (connectionNode.ChildNodes[i].Attributes["NORTH"] != null ) { setConnection.north = Int32.Parse(connectionNode.ChildNodes[i].Attributes["NORTH"].Value); Console.WriteLine(setConnection.north); }
-             
+                if (connectionNode.ChildNodes[i].Attributes["SOUTH"] != null ) { setConnection.south = Int32.Parse(connectionNode.ChildNodes[i].Attributes["SOUTH"].Value); Console.WriteLine(setConnection.south); }
+                if (connectionNode.ChildNodes[i].Attributes["WEST"] != null ) { setConnection.west = Int32.Parse(connectionNode.ChildNodes[i].Attributes["WEST"].Value); Console.WriteLine(setConnection.west); }
+                if (connectionNode.ChildNodes[i].Attributes["EAST"] != null ) { setConnection.east = Int32.Parse(connectionNode.ChildNodes[i].Attributes["EAST"].Value); Console.WriteLine(setConnection.east); }
+                connectionList.Add(setConnection);
             }
-            List<Connection> connectionList = new List<Connection>();
+           
             return connectionList;
         }
     }
 
-
-
-    }
+}
 
       
 
